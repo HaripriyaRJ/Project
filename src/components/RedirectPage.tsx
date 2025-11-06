@@ -15,23 +15,17 @@ export default function RedirectPage() {
       }
 
       try {
-        const { data, error: fetchError } = await supabase
-          .from('shortened_urls')
-          .select('original_url, id, clicks')
-          .eq('short_code', shortCode)
-          .maybeSingle();
+        // Call RPC that validates the short code, increments clicks, and returns original_url
+        const { data, error: rpcError } = await supabase.rpc('redirect_and_count', {
+          p_short_code: shortCode,
+        });
 
-        if (fetchError || !data) {
+        if (rpcError || !data || !data.original_url) {
           setError(true);
           return;
         }
 
-        await supabase
-          .from('shortened_urls')
-          .update({ clicks: (data.clicks || 0) + 1 })
-          .eq('id', data.id);
-
-        window.location.href = data.original_url;
+        window.location.href = data.original_url as string;
       } catch (err) {
         setError(true);
       }

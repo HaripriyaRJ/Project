@@ -14,14 +14,22 @@ export default function UrlShortener() {
   useEffect(() => {
     if (user) {
       loadUrls();
+    } else {
+      setUrls([]);
     }
   }, [user]);
 
   const loadUrls = async () => {
     try {
+      if (!user?.id) {
+        setUrls([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('shortened_urls')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -47,6 +55,11 @@ export default function UrlShortener() {
     setLoading(true);
 
     try {
+      if (!user?.id) {
+        setError('Please sign in to shorten URLs.');
+        setLoading(false);
+        return;
+      }
       if (!originalUrl.startsWith('http://') && !originalUrl.startsWith('https://')) {
         setError('Please enter a valid URL starting with http:// or https://');
         setLoading(false);
@@ -58,7 +71,7 @@ export default function UrlShortener() {
       const { error: insertError } = await supabase
         .from('shortened_urls')
         .insert({
-          user_id: user?.id,
+          user_id: user.id,
           original_url: originalUrl,
           short_code: shortCode,
         });
@@ -84,10 +97,12 @@ export default function UrlShortener() {
 
   const deleteUrl = async (id: string) => {
     try {
+      if (!user?.id) return;
       const { error } = await supabase
         .from('shortened_urls')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
       loadUrls();
