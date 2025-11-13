@@ -20,12 +20,17 @@ export default function RedirectPage() {
           p_short_code: shortCode,
         });
 
-        if (rpcError || !data || !data.original_url) {
+        // Supabase RPCs that return a table typically return an array of rows.
+        const originalUrl = Array.isArray(data)
+          ? data?.[0]?.original_url
+          : (data as any)?.original_url;
+
+        if (rpcError || !originalUrl) {
           setError(true);
           return;
         }
 
-        window.location.href = data.original_url as string;
+        window.location.href = originalUrl as string;
       } catch (err) {
         setError(true);
       }
