@@ -5,6 +5,20 @@ export default function QrGenerator() {
   const [url, setUrl] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [error, setError] = useState('');
+  const [styleKey, setStyleKey] = useState<'classic' | 'blue' | 'inverted' | 'navy'>('classic');
+
+  const styles: Record<string, { label: string; color: string; bgcolor: string }> = {
+    classic: { label: 'Classic', color: '0-0-0', bgcolor: '255-255-255' }, // black on white
+    blue: { label: 'Blue', color: '0-102-255', bgcolor: '255-255-255' },   // blue on white
+    inverted: { label: 'Inverted', color: '255-255-255', bgcolor: '0-0-0' }, // white on black
+    navy: { label: 'Navy', color: '10-28-61', bgcolor: '225-239-255' },    // navy on pale blue
+  };
+
+  const buildQrUrl = (value: string, key: keyof typeof styles) => {
+    const s = styles[key];
+    const encoded = encodeURIComponent(value);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}&color=${s.color}&bgcolor=${s.bgcolor}&format=png`;
+  };
 
   const generateQrCode = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,8 +34,7 @@ export default function QrGenerator() {
       return;
     }
 
-    const encodedUrl = encodeURIComponent(url);
-    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodedUrl}`;
+    const qrApiUrl = buildQrUrl(url, styleKey);
     setQrCodeUrl(qrApiUrl);
   };
 
@@ -63,6 +76,34 @@ export default function QrGenerator() {
         <p className="text-gray-600 mb-6">Convert any URL into a scannable QR code</p>
 
         <form onSubmit={generateQrCode} className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {Object.entries(styles).map(([key, s]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => {
+                  setStyleKey(key as any);
+                  if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+                    setQrCodeUrl(buildQrUrl(url, key as any));
+                  }
+                }}
+                className={`flex items-center gap-2 px-3 py-2 rounded-md border transition ${
+                  styleKey === key ? 'bg-white border-blue-500 shadow-sm' : 'bg-white/70 hover:bg-white border-gray-200'
+                }`}
+                title={s.label}
+              >
+                <span
+                  className="inline-block w-5 h-5 rounded-sm border"
+                  style={{
+                    background: `rgb(${s.bgcolor.split('-').join(',')})`,
+                    boxShadow: `inset 0 0 0 8px rgb(${s.color.split('-').join(',')})`,
+                  }}
+                />
+                <span className="text-sm text-gray-700">{s.label}</span>
+              </button>
+            ))}
+          </div>
+
           <div className="flex gap-3">
             <div className="flex-1">
               <input

@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 export default async function handler(req: any, res: any) {
   try {
     const { shortCode } = req.query || {};
+    const isQr = req.query?.qr === '1' || req.query?.qr === 1;
     if (!shortCode || Array.isArray(shortCode)) {
       res.status(400).send('Bad Request: missing short code');
       return;
@@ -18,9 +19,8 @@ export default async function handler(req: any, res: any) {
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    const { data, error } = await supabase.rpc('redirect_and_count', {
-      p_short_code: shortCode,
-    });
+    const rpcName = isQr ? 'redirect_and_count_qr' : 'redirect_and_count';
+    const { data, error } = await supabase.rpc(rpcName, { p_short_code: shortCode });
 
     const originalUrl = Array.isArray(data) ? data?.[0]?.original_url : (data as any)?.original_url;
 

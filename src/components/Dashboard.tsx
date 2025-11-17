@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link2, QrCode, LogOut, Sparkles } from 'lucide-react';
+import { Link2, QrCode, LogOut, Sparkles, BarChart2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import UrlShortener from './UrlShortener';
 import QrGenerator from './QrGenerator';
+import Analytics from './Analytics';
 
-type Tab = 'shortener' | 'qr';
+type Tab = 'shortener' | 'qr' | 'analytics';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('shortener');
@@ -65,11 +66,24 @@ export default function Dashboard() {
                 <QrCode className="w-5 h-5" />
                 <span>QR Code Generator</span>
               </button>
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-medium transition ${
+                  activeTab === 'analytics'
+                    ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <BarChart2 className="w-5 h-5" />
+                <span>Analytics</span>
+              </button>
             </div>
           </div>
 
           <div className="p-6">
-            {activeTab === 'shortener' ? <UrlShortener /> : <QrGenerator />}
+            {activeTab === 'shortener' && <UrlShortener />}
+            {activeTab === 'qr' && <QrGenerator />}
+            {activeTab === 'analytics' && <Analytics />}
           </div>
         </div>
       </div>
