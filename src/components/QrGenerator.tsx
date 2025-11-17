@@ -28,12 +28,26 @@ export default function QrGenerator() {
   const downloadQrCode = () => {
     if (!qrCodeUrl) return;
 
-    const link = document.createElement('a');
-    link.href = qrCodeUrl;
-    link.download = 'qrcode.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Download via Blob to avoid cross-origin restrictions on the download attribute
+    (async () => {
+      try {
+        const response = await fetch(qrCodeUrl, { mode: 'cors' });
+        if (!response.ok) throw new Error('Failed to fetch QR image');
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = 'qrcode.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      } catch (err: any) {
+        setError(err?.message || 'Failed to download QR code');
+        setTimeout(() => setError(''), 3000);
+      }
+    })();
   };
 
   const clearQrCode = () => {
