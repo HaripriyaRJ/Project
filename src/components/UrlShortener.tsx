@@ -198,9 +198,9 @@ export default function UrlShortener() {
 
   return (
     <div className="space-y-8">
-      <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Shorten Your URL</h2>
-        <p className="text-gray-600 mb-6">Transform long URLs into short, shareable links</p>
+      <div className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl p-6">
+        <h2 className="text-2xl font-bold text-white mb-2">Shorten Your URL</h2>
+        <p className="text-sky-100/80 mb-6">Transform long URLs into short, shareable links</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-3">
@@ -210,14 +210,14 @@ export default function UrlShortener() {
                 value={originalUrl}
                 onChange={(e) => setOriginalUrl(e.target.value)}
                 placeholder="https://example.com/your-very-long-url"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-3 rounded-lg border border-white/30 bg-white/10 text-white placeholder-white/60 focus:ring-2 focus:ring-sky-300/40 focus:border-transparent outline-none"
                 required
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition disabled:opacity-50 flex items-center gap-2 shadow-lg hover:shadow-xl"
+              className="px-6 py-3 bg-white text-sky-900 hover:bg-sky-50 font-semibold rounded-lg transition disabled:opacity-50 flex items-center gap-2 shadow-lg hover:shadow-xl"
             >
               <Link2 className="w-5 h-5" />
               <span>{loading ? 'Shortening...' : 'Shorten'}</span>
@@ -231,23 +231,23 @@ export default function UrlShortener() {
                 value={customAlias}
                 onChange={(e) => setCustomAlias(e.target.value)}
                 placeholder="Optional: custom alias (e.g. my-link)"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-3 rounded-lg border border-white/30 bg-white/10 text-white placeholder-white/60 focus:ring-2 focus:ring-sky-300/40 focus:border-transparent outline-none"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-white/70 mt-1">
                 Allowed: letters, numbers, - and _. At least 3 characters.
               </p>
             </div>
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="p-3 bg-red-500/10 border border-red-400/30 rounded-lg">
+              <p className="text-sm text-red-200">{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-600">{success}</p>
+            <div className="p-3 bg-green-500/10 border border-green-400/30 rounded-lg">
+              <p className="text-sm text-green-200">{success}</p>
             </div>
           )}
         </form>
@@ -255,17 +255,17 @@ export default function UrlShortener() {
 
       {urls.length > 0 && (
         <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Your Shortened Links</h3>
+          <h3 className="text-xl font-bold text-white mb-4">Your Shortened Links</h3>
           <div className="space-y-3">
             {urls.map((url) => (
               <div
                 key={url.id}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
+                className="bg-white/10 border border-white/20 rounded-lg p-4 hover:bg-white/15 transition text-white"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-mono rounded-md">
+                      <span className="px-3 py-1 bg-sky-100 text-sky-700 text-sm font-mono rounded-md">
                         {window.location.origin}/r/{url.short_code}
                       </span>
                       <button
@@ -276,13 +276,13 @@ export default function UrlShortener() {
                         <Copy className="w-4 h-4 text-gray-600" />
                       </button>
                     </div>
-                    <p className="text-sm text-gray-600 truncate">{url.original_url}</p>
+                    <p className="text-sm text-white/80 truncate">{url.original_url}</p>
                     <div className="flex items-center gap-4 mt-2">
-                      <span className="flex items-center gap-1 text-xs text-gray-500">
+                      <span className="flex items-center gap-1 text-xs text-white/70">
                         <TrendingUp className="w-3 h-3" />
                         {url.clicks} clicks
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-white/70">
                         Created {new Date(url.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -290,13 +290,13 @@ export default function UrlShortener() {
                   <div className="flex gap-2 relative">
                     <button
                       onClick={() => setShareOpenId(shareOpenId === url.id ? null : url.id)}
-                      className="p-2 hover:bg-gray-100 text-gray-700 rounded transition"
+                      className="p-2 hover:bg-white/10 text-white rounded transition"
                       title="Share"
                     >
                       <Share2 className="w-4 h-4" />
                     </button>
                     {shareOpenId === url.id && (
-                      <div className="absolute right-0 top-8 z-10 bg-white border border-gray-200 rounded-lg shadow-lg w-48 p-2">
+                      <div className="absolute right-0 top-8 z-10 bg-white/90 border border-gray-200 rounded-lg shadow-2xl w-56 p-2 text-gray-800">
                         {buildShareTargets(`${window.location.origin}/r/${url.short_code}`, url.original_url).map((item) => (
                           <div key={item.name}>
                             {item.href ? (
@@ -304,7 +304,7 @@ export default function UrlShortener() {
                                 href={item.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                                className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 rounded"
                                 onClick={() => setShareOpenId(null)}
                               >
                                 {item.icon}
@@ -313,7 +313,7 @@ export default function UrlShortener() {
                             ) : (
                               <button
                                 onClick={item.onClick}
-                                className="w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                                className="w-full flex items-center gap-2 text-left px-3 py-2 text-sm hover:bg-gray-100 rounded"
                               >
                                 {item.icon}
                                 <span>{item.name}</span>
@@ -325,14 +325,14 @@ export default function UrlShortener() {
                     )}
                     <button
                       onClick={() => openOriginalUrl(url.original_url)}
-                      className="p-2 hover:bg-blue-50 text-blue-600 rounded transition"
+                      className="p-2 hover:bg-white/10 text-sky-300 rounded transition"
                       title="Open original URL"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => deleteUrl(url.id)}
-                      className="p-2 hover:bg-red-50 text-red-600 rounded transition"
+                      className="p-2 hover:bg-white/10 text-red-300 rounded transition"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />

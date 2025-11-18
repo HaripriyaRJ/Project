@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import WelcomePage from './components/WelcomePage';
 import Dashboard from './components/Dashboard';
 import RedirectPage from './components/RedirectPage';
+import SignIn from './components/SignIn';
+import SignUp from './components/SignUp';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -42,6 +44,22 @@ function App() {
             element={
               <PublicRoute>
                 <WelcomePage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/signin"
+            element={
+              <PublicRoute>
+                <SignIn />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <PublicRoute>
+                <SignUp />
               </PublicRoute>
             }
           />

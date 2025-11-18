@@ -12,25 +12,25 @@ export default function Dashboard() {
   const { profile, signOut } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+    <div className="min-h-screen bg-gradient-to-br from-sky-950 via-emerald-950 to-amber-950">
+      <nav className="bg-white/10 backdrop-blur border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-blue-600 rounded-lg">
+              <div className="p-2 bg-white/10 border border-white/20 rounded-lg">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">LinkSpark</span>
+              <span className="text-xl font-bold text-white">LinkSpark</span>
             </div>
 
             <div className="flex items-center gap-4">
               <div className="text-sm">
-                <p className="text-gray-600">Welcome back,</p>
-                <p className="font-semibold text-gray-900">{profile?.username}</p>
+                <p className="text-white/80">Welcome back,</p>
+                <p className="font-semibold text-white">{profile?.username}</p>
               </div>
               <button
                 onClick={signOut}
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                className="flex items-center gap-2 px-4 py-2 text-white hover:bg-white/10 rounded-lg transition"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="text-sm font-medium">Sign Out</span>
@@ -41,15 +41,15 @@ export default function Dashboard() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200">
+        <div className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl overflow-hidden">
+          <div className="border-b border-white/20">
             <div className="flex">
               <button
                 onClick={() => setActiveTab('shortener')}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-medium transition ${
                   activeTab === 'shortener'
-                    ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-white/10 text-white border-b-2 border-white/60'
+                    : 'text-white/80 hover:bg-white/5'
                 }`}
               >
                 <Link2 className="w-5 h-5" />
@@ -59,8 +59,8 @@ export default function Dashboard() {
                 onClick={() => setActiveTab('qr')}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-medium transition ${
                   activeTab === 'qr'
-                    ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-white/10 text-white border-b-2 border-white/60'
+                    : 'text-white/80 hover:bg-white/5'
                 }`}
               >
                 <QrCode className="w-5 h-5" />
@@ -70,8 +70,8 @@ export default function Dashboard() {
                 onClick={() => setActiveTab('analytics')}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-medium transition ${
                   activeTab === 'analytics'
-                    ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-white/10 text-white border-b-2 border-white/60'
+                    : 'text-white/80 hover:bg-white/5'
                 }`}
               >
                 <BarChart2 className="w-5 h-5" />
@@ -80,7 +80,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-6 text-white">
             {activeTab === 'shortener' && <UrlShortener />}
             {activeTab === 'qr' && <QrGenerator />}
             {activeTab === 'analytics' && <Analytics />}
