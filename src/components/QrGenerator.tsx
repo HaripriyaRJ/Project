@@ -1,11 +1,15 @@
-import { useState } from 'react';
-import { QrCode, Download } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { QrCode, Download, Trash2, ExternalLink, Clock } from 'lucide-react';
+import { supabase, QrCodeItem } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function QrGenerator() {
   const [url, setUrl] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [error, setError] = useState('');
   const [styleKey, setStyleKey] = useState<'classic' | 'blue' | 'inverted' | 'navy'>('classic');
+  const [history, setHistory] = useState<QrCodeItem[]>([]);
+  const { user } = useAuth();
 
   const styles: Record<string, { label: string; color: string; bgcolor: string }> = {
     classic: { label: 'Classic', color: '0-0-0', bgcolor: '255-255-255' }, // black on white
@@ -13,6 +17,37 @@ export default function QrGenerator() {
     inverted: { label: 'Inverted', color: '255-255-255', bgcolor: '0-0-0' }, // white on black
     navy: { label: 'Navy', color: '10-28-61', bgcolor: '225-239-255' },    // navy on pale blue
   };
+
+  const loadHistory = async () => {
+    try {
+      if (!user?.id) { setHistory([]); return; }
+      const { data, error } = await supabase
+        .from('qr_codes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setHistory(data || []);
+    } catch (err) {
+      console.error('Failed to load QR history', err);
+    }
+  };
+
+  const deleteHistory = async (id: string) => {
+    try {
+      if (!user?.id) return;
+      const { error } = await supabase.from('qr_codes').delete().eq('id', id).eq('user_id', user.id);
+      if (error) throw error;
+      await loadHistory();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  useEffect(() => {
+    if (user) loadHistory(); else setHistory([]);
+  }, [user]);
 
   const buildQrUrl = (value: string, key: keyof typeof styles) => {
     const s = styles[key];
@@ -36,6 +71,31 @@ export default function QrGenerator() {
 
     const qrApiUrl = buildQrUrl(url, styleKey);
     setQrCodeUrl(qrApiUrl);
+
+    // Optimistically add to history so it shows immediately
+    if (user?.id) {
+      const tempId = (globalThis as any).crypto?.randomUUID?.() || `tmp-${Date.now()}`;
+      const optimistic = { id: tempId, user_id: user.id, original_url: url, style: styleKey, qr_url: qrApiUrl, created_at: new Date().toISOString() } as QrCodeItem;
+      setHistory((prev) => [optimistic, ...prev]);
+    }
+
+    // Save history for signed-in users
+    (async () => {
+      try {
+        if (!user?.id) return;
+        const { error: insErr } = await supabase.from('qr_codes').insert({
+          user_id: user.id,
+          original_url: url,
+          style: styleKey,
+          qr_url: qrApiUrl,
+        });
+        if (insErr) throw insErr;
+        await loadHistory(); // refresh to get real IDs
+      } catch (err) {
+        // non-blocking
+        console.warn('QR history insert failed', err);
+      }
+    })();
   };
 
   const downloadQrCode = () => {
@@ -169,6 +229,38 @@ export default function QrGenerator() {
                 <span className="font-semibold text-white">Tip:</span> You can scan this QR code with any smartphone camera to instantly open the URL.
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {history.length > 0 && (
+        <div>
+          <h3 className="text-xl font-bold text-white mb-4">Your QR History</h3>
+          <div className="space-y-3">
+            {history.map((item) => (
+              <div key={item.id} className="bg-white/10 border border-white/20 rounded-lg p-4 hover:bg-white/15 transition text-white">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-sm rounded-md">{item.style}</span>
+                    </div>
+                    <p className="text-sm text-white/80 truncate">{item.original_url}</p>
+                    <div className="flex items-center gap-4 mt-2 text-white/70 text-xs">
+                      <Clock className="w-3 h-3" />
+                      <span>Created {new Date(item.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <a href={item.qr_url} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-white/10 rounded text-sky-300" title="Open image">
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                    <button onClick={() => deleteHistory(item.id)} className="p-2 hover:bg-white/10 rounded text-red-300" title="Delete">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

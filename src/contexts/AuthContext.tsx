@@ -9,6 +9,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, username: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  updateDisplayName: (name: string) => Promise<{ error: any }>; 
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, username: string) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -99,8 +100,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const updateDisplayName = async (name: string) => {
+    try {
+      if (!user?.id) return { error: new Error('Not signed in') };
+
+      // Update auth user metadata
+      const { error: authErr } = await supabase.auth.updateUser({ data: { username: name } });
+      if (authErr) return { error: authErr };
+
+      // Upsert into profiles table
+      const { error: upErr } = await supabase
+        .from('profiles')
+        .upsert({ id: user.id, username: name, email: user.email }, { onConflict: 'id' })
+        .select('*')
+        .maybeSingle();
+      if (upErr) return { error: upErr };
+
+      // Update local state
+      setProfile((prev) => ({ ...(prev || ({} as Profile)), id: user.id as any, username: name } as Profile));
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut, updateDisplayName }}>
       {children}
     </AuthContext.Provider>
   );

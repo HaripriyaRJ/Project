@@ -21,3 +21,12 @@ export interface ShortenedUrl {
   created_at: string;
   updated_at: string;
 }
+
+export interface QrCodeItem {
+  id: string;
+  user_id: string;
+  original_url: string;
+  style: string;
+  qr_url: string;
+  created_at: string;
+}
