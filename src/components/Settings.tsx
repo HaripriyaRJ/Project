@@ -50,7 +50,6 @@ export default function Settings() {
         <section className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl">
           <div className="p-6 border-b border-white/10">
             <h3 className="text-lg font-semibold text-white">Preferences</h3>
-            <p className="text-sm text-white/70">Display name</p>
           </div>
           <div className="p-6">
             <div className="max-w-xl">

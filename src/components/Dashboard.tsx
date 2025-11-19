@@ -1,16 +1,19 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Link2, QrCode, LogOut, Sparkles, BarChart2, Settings as SettingsIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import UrlShortener from './UrlShortener';
 import QrGenerator from './QrGenerator';
 import Analytics from './Analytics';
 import Settings from './Settings';
+import LinksPanel from './LinksPanel';
 
-type Tab = 'shortener' | 'qr' | 'analytics' | 'settings';
+type Tab = 'links' | 'shortener' | 'qr' | 'analytics' | 'settings';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('shortener');
   const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-950 via-emerald-950 to-amber-950">
@@ -30,7 +33,9 @@ export default function Dashboard() {
                 <p className="font-semibold text-white">{profile?.username}</p>
               </div>
               <button
-                onClick={signOut}
+                onClick={async () => {
+                  try { await signOut(); } finally { navigate('/', { replace: true }); }
+                }}
                 className="flex items-center gap-2 px-4 py-2 text-white hover:bg-white/10 rounded-lg transition"
               >
                 <LogOut className="w-4 h-4" />
@@ -62,6 +67,16 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-2">
+              <button
+                onClick={() => setActiveTab('links')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                  activeTab === 'links' ? 'bg-white/10 text-white' : 'text-white/80 hover:bg-white/5'
+                }`}
+              >
+                <Link2 className="w-5 h-5" />
+                <span className="text-sm whitespace-nowrap">Links</span>
+              </button>
+
               <button
                 onClick={() => setActiveTab('shortener')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
@@ -102,6 +117,7 @@ export default function Dashboard() {
           </aside>
 
           <main className="lg:col-span-9 rounded-xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl p-6 text-white">
+            {activeTab === 'links' && <LinksPanel />}
             {activeTab === 'shortener' && <UrlShortener />}
             {activeTab === 'qr' && <QrGenerator />}
             {activeTab === 'analytics' && <Analytics />}

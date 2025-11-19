@@ -20,6 +20,8 @@ export interface ShortenedUrl {
   clicks: number;
   created_at: string;
   updated_at: string;
+  title?: string;
+  description?: string;
 }
 
 export interface QrCodeItem {
@@ -29,4 +31,6 @@ export interface QrCodeItem {
   style: string;
   qr_url: string;
   created_at: string;
+  title?: string;
+  description?: string;
 }

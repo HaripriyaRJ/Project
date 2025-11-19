@@ -10,6 +10,9 @@ export default function QrGenerator() {
   const [styleKey, setStyleKey] = useState<'classic' | 'blue' | 'inverted' | 'navy'>('classic');
   const [history, setHistory] = useState<QrCodeItem[]>([]);
   const { user } = useAuth();
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [showMeta, setShowMeta] = useState(false);
 
   const styles: Record<string, { label: string; color: string; bgcolor: string }> = {
     classic: { label: 'Classic', color: '0-0-0', bgcolor: '255-255-255' }, // black on white
@@ -55,8 +58,8 @@ export default function QrGenerator() {
     return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}&color=${s.color}&bgcolor=${s.bgcolor}&format=png`;
   };
 
-  const generateQrCode = (e: React.FormEvent) => {
-    e.preventDefault();
+  const generateQrCode = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setError('');
 
     if (!url.trim()) {
@@ -75,7 +78,7 @@ export default function QrGenerator() {
     // Optimistically add to history so it shows immediately
     if (user?.id) {
       const tempId = (globalThis as any).crypto?.randomUUID?.() || `tmp-${Date.now()}`;
-      const optimistic = { id: tempId, user_id: user.id, original_url: url, style: styleKey, qr_url: qrApiUrl, created_at: new Date().toISOString() } as QrCodeItem;
+      const optimistic = { id: tempId, user_id: user.id, original_url: url, style: styleKey, qr_url: qrApiUrl, created_at: new Date().toISOString(), title: title.trim() || undefined, description: description.trim() || undefined } as QrCodeItem;
       setHistory((prev) => [optimistic, ...prev]);
     }
 
@@ -88,6 +91,8 @@ export default function QrGenerator() {
           original_url: url,
           style: styleKey,
           qr_url: qrApiUrl,
+          title: title.trim() || null,
+          description: description.trim() || null,
         });
         if (insErr) throw insErr;
         await loadHistory(); // refresh to get real IDs
@@ -135,8 +140,8 @@ export default function QrGenerator() {
         <h2 className="text-2xl font-bold text-white mb-2">Generate QR Code</h2>
         <p className="text-sky-100/80 mb-6">Convert any URL into a scannable QR code</p>
 
-        <form onSubmit={generateQrCode} className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
+        <form onSubmit={(e)=>e.preventDefault()} className="flex flex-col gap-4">
+          <div className="flex items-center gap-2">
             {Object.entries(styles).map(([key, s]) => (
               <button
                 key={key}
@@ -176,7 +181,8 @@ export default function QrGenerator() {
               />
             </div>
             <button
-              type="submit"
+              type="button"
+              onClick={()=> setShowMeta(true)}
               className="px-6 py-3 bg-white text-sky-900 hover:bg-sky-50 font-semibold rounded-lg transition flex items-center gap-2 shadow-lg hover:shadow-xl"
             >
               <QrCode className="w-5 h-5" />
@@ -189,6 +195,35 @@ export default function QrGenerator() {
               <p className="text-sm text-red-200">{error}</p>
             </div>
           )}
+
+      {showMeta && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60" onClick={()=> setShowMeta(false)} />
+          <div className="relative z-10 w-full max-w-md rounded-2xl bg-white shadow-2xl p-6 text-slate-900">
+            <h4 className="text-lg font-semibold mb-4">Add details</h4>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Title (optional)"
+                className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-sky-300 focus:border-sky-300 outline-none"
+              />
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Description (optional)"
+                rows={3}
+                className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-sky-300 focus:border-sky-300 outline-none"
+              />
+            </div>
+            <div className="mt-5 flex justify-end gap-3">
+              <button className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200" onClick={()=> setShowMeta(false)}>Cancel</button>
+              <button className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 font-semibold" onClick={()=> { generateQrCode(); setShowMeta(false); }}>Done</button>
+            </div>
+          </div>
+        </div>
+      )}
         </form>
       </div>
 
@@ -244,6 +279,9 @@ export default function QrGenerator() {
                     <div className="flex items-center gap-2 mb-2">
                       <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-sm rounded-md">{item.style}</span>
                     </div>
+                    {item.title && (
+                      <div className="text-sm font-semibold text-white/90 mb-1 truncate">{item.title}</div>
+                    )}
                     <p className="text-sm text-white/80 truncate">{item.original_url}</p>
                     <div className="flex items-center gap-4 mt-2 text-white/70 text-xs">
                       <Clock className="w-3 h-3" />
